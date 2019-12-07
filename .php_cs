@@ -10,6 +10,7 @@ $config = PhpCsFixer\Config::create()
     ->setRiskyAllowed(false)
     ->setRules([
         '@PhpCsFixer' => true,
+        'phpdoc_no_empty_return' => false,
         '@PSR2' => true,
         'array_syntax' => ['syntax' => 'short'],
         'list_syntax' => ['syntax' => 'long'],

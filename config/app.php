@@ -174,7 +174,8 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        LaravelDoctrine\ORM\DoctrineServiceProvider::class
+        \App\Infrastructure\Providers\DoctrineServiceProvider::class,
+        \App\Providers\RepositoryServiceProvider::class,
 
     ],
 

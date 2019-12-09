@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -18,7 +19,13 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    use AuthenticatesUsers {
+        incrementLoginAttempts as traitIncrementLoginAttempts;
+        validateLogin as traitValidateLogin;
+    }
+
+    /** @var int */
+    protected const MAX_FAILURE_BEFORE_CAPTCHA = 3;
 
     /**
      * Where to redirect users after login.
@@ -40,5 +47,41 @@ class LoginController extends Controller
     public function username(): string
     {
         return 'username';
+    }
+
+    protected function getAttempts(Request $request): int
+    {
+        return $this->limiter()->attempts($this->throttleKey($request));
+    }
+
+    protected function isCaptchaAttemptsReached(Request $request): bool
+    {
+        return $this->getAttempts($request) >= self::MAX_FAILURE_BEFORE_CAPTCHA;
+    }
+
+    protected function incrementLoginAttempts(Request $request)
+    {
+        $this->traitIncrementLoginAttempts($request);
+
+        $attempts = $this->getAttempts($request);
+        $request->session()->put(
+            'captcha',
+            [
+                'maxAttempts' => self::MAX_FAILURE_BEFORE_CAPTCHA,
+                'currentAttempts' => $attempts,
+                'needToDisplay' => $this->isCaptchaAttemptsReached($request),
+            ]
+        );
+    }
+
+    protected function validateLogin(Request $request)
+    {
+        $this->traitValidateLogin($request);
+
+        if ($this->isCaptchaAttemptsReached($request)) {
+            $request->validate([
+                recaptchaFieldName() => recaptchaRuleName(),
+            ]);
+        }
     }
 }

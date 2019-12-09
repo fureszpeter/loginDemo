@@ -16,7 +16,6 @@
 
                             <div class="col-md-6">
                                 <input id="username" type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username') }}" required autocomplete="username" autofocus>
-
                                 @error('username')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -53,6 +52,12 @@
 
                         <div class="form-group row mb-0">
                             <div class="col-md-8 offset-md-4">
+                                @if(session('captcha')['needToDisplay'])
+                                    {!! htmlFormSnippet() !!}
+                                    @error(recaptchaFieldName())
+                                    <div class="alert alert-danger">{{ $message }}</div>
+                                    @enderror
+                                @endif
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('Login') }}
                                 </button>

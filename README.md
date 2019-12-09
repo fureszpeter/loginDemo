@@ -19,5 +19,21 @@
 ## Steps
 
 - Install the framework
+- Add Doctrine (DataMapper ORM) to project 
 - Add php-cs-fixer
+- Add Laravel default authentication module
+- Customize the table to fit domain requirements (use username instead of email for login)
+    - Use migrations to change to scheme
+- Create the User entity
+- Change Auth driver from `eloquent` to `doctrine`
+- `User` entity implements `Authenticatable` interface
+- Create `UserRepository`, `RepositoryServiceProvider`, `RegistrationService`
+
+# Issues
+
+1. `laravel-doctrine/orm` ***has a bug*** in `DoctrineUserProvider::retrieveById`, so I need to open a PR to fix this
+ Because of the problem described above, I needed to override some class from vendor.
+ Files can be removed after LaravelDoctrine community merge the fix:
+    - `\App\Infrastructure\Auth\DoctrineUserProvider`
+    - `\App\Infrastructure\Providers\DoctrineServiceProvider`
 

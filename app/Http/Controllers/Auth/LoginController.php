@@ -20,12 +20,12 @@ class LoginController extends Controller
     */
 
     use AuthenticatesUsers {
-        login as traitLogin;
+        incrementLoginAttempts as traitIncrementLoginAttempts;
         validateLogin as traitValidateLogin;
     }
 
     /** @var int */
-    protected const MAX_FAILURE_BEFORE_CAPTCHA = 2;
+    protected const MAX_FAILURE_BEFORE_CAPTCHA = 3;
 
     /**
      * Where to redirect users after login.
@@ -49,8 +49,20 @@ class LoginController extends Controller
         return 'username';
     }
 
-    public function login(Request $request)
+    protected function getAttempts(Request $request): int
     {
+        return $this->limiter()->attempts($this->throttleKey($request));
+    }
+
+    protected function isCaptchaAttemptsReached(Request $request): bool
+    {
+        return $this->getAttempts($request) >= self::MAX_FAILURE_BEFORE_CAPTCHA;
+    }
+
+    protected function incrementLoginAttempts(Request $request)
+    {
+        $this->traitIncrementLoginAttempts($request);
+
         $attempts = $this->getAttempts($request);
         $request->session()->put(
             'captcha',
@@ -60,18 +72,6 @@ class LoginController extends Controller
                 'needToDisplay' => $this->isCaptchaAttemptsReached($request),
             ]
         );
-
-        return $this->traitLogin($request);
-    }
-
-    protected function getAttempts(Request $request): int
-    {
-        return $this->limiter()->attempts($this->throttleKey($request));
-    }
-
-    protected function isCaptchaAttemptsReached(Request $request): bool
-    {
-        return $this->getAttempts($request) >= self::MAX_FAILURE_BEFORE_CAPTCHA;
     }
 
     protected function validateLogin(Request $request)

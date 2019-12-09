@@ -49,8 +49,13 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'email' => ['required', 'string', 'email', 'max:255',
+            /**
+             * @TODO Need to change after Laravel Doctrine implemented fully
+             */
+//                'unique:users',
+            ],
+            'password' => ['required', 'string', 'min:3', 'confirmed'],
         ]);
     }
 
